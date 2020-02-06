@@ -9,9 +9,7 @@ int main(int count,char *args[]){
 	int N = atoi(args[2]);
 	char * fn = args[3];
 	printf("%d\t%d\t%s\n",S,N,fn);
-
 	int Game[50],pipes[N][2][2];
-
 	for(int i=0 ; i<N ; i++){
 		/*Pipe To Request child a number*/
 		pipe(pipes[i][0]);
