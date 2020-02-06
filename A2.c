@@ -8,6 +8,7 @@
 #include<readline/history.h> 
 
 int main(){
+
 	int status = 0;
 	char hostname[100], *buf;
 	gethostname(hostname,100);
@@ -15,7 +16,7 @@ int main(){
 	
 	do{
 			pid_t pid = fork();  
-		  char * parsed[] = {"ls","-a","-a"};
+			char * parsed[] = {"ls","-a","-a"};
 			if (pid == -1) { 
 				printf("\nFailed forking child.."); 
 				//return; 

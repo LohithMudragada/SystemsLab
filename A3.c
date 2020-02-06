@@ -4,7 +4,7 @@
 
 int main(int count,char *args[]){
 
-	int pid,rid,*id;
+	int pid=0,rid,*id,status = 0;
 	int S = atoi(args[1]);
 	int N = atoi(args[2]);
 	char * fn = args[3];
@@ -25,18 +25,43 @@ int main(int count,char *args[]){
 			break;
 		}
 	}
+	int k=5;
 
+	while(k--){
+		if(pid == 0){
+			close(pipes[rid][0][1]);
+			read(pipes[rid][0][0],id,sizeof(int));
+			if(*id == rid) {
+				close(pipes[rid][1][0]);
+				write(pipes[rid][1][1],id,sizeof(int));
+			}
+		}
+		else{
+			printf("%d\n",k);
+			for(int i=0 ; i<N ; i++){
+				close(pipes[i][0][0]);
+				write(pipes[i][0][1],&i,sizeof(int));
+				close(pipes[i][1][1]);
+				read(pipes[i][1][0],id,sizeof(int));
+				printf("responded child : %d\n",*id);
+			}
+		}
+	}
 	if(pid == 0){
 		close(pipes[rid][0][1]);
 		read(pipes[rid][0][0],id,sizeof(int));
 		if(*id == rid) printf("Im child : %d\n",rid);
-		exit(2);
+		if(*id == -1)exit(2);
 	}
 	else{
+		//printf("%d\n",k);
 		for(int i=0 ; i<N ; i++){
-			close(pipes[rid][0][0]);
-			write(pipes[i][0][1],&i,sizeof(int));
+			k=-1;
+			close(pipes[i][0][0]);
+			write(pipes[i][0][1],&k,sizeof(int));
+			close(pipes[i][0][1]);
 		}
+		while ((wait(&status)) > 0);
 	}
 
 	return 0;
