@@ -1,18 +1,35 @@
 #include<stdio.h> 
 #include<string.h> 
 #include<stdlib.h> 
-#include<unistd.h> 
+#include<unistd.h>
+#include <time.h>
+#include <sys/stat.h>
 #include<sys/types.h> 
 #include<sys/wait.h> 
 #include<readline/readline.h> 
 #include<readline/history.h>
+#include<dirent.h>
 
-// void ls(int count, char * args[]){
-
-//     struct dirent *de;
-//     if(count)
-
-// }
+int ls(int count,char *args[])
+{
+	struct dirent *dp;
+	DIR *dir = opendir(".");
+    if(count == 1)
+        if(dir == NULL) printf("Directory cannot be Opened");
+	    else {
+			while((dp = readdir(dir)) != NULL) {
+                if(dp->d_name[0] != '.')printf("%s\t",dp->d_name);
+			}
+		}
+            
+    else{
+		if(strcmp(args[1],"-a") == 0) {
+			if(dir == NULL) printf("Directory cannot be Opened");
+			else while((dp = readdir(dir)) != NULL) printf("%s\t",dp->d_name);
+		}
+		    	
+	}
+}
 
 int cp(char *in, char *out){
 
@@ -21,7 +38,7 @@ int cp(char *in, char *out){
         printf("can't open input file");
         return -1;
     }
-    if((fout = fopen(out,"r")) == NULL) {
+    if((fout = fopen(out,"w")) == NULL) {
         printf("can't open output file");
         return -1;
     }
@@ -31,6 +48,8 @@ int cp(char *in, char *out){
         c = fgetc(fin);
     }
 
+    fclose(fin);
+    fclose(fout);
     return 1;
 }
 
@@ -39,9 +58,10 @@ void cd(char *dir){
     chdir(dir);
 }
 
-void mkdir_commnd(char *dn, char *opt){
-    if(opt == NULL) mkdir(dn);
-    else mkdir(dn,opt);
+void mkdir_commnd(int count, char *args[]){
+    printf("In mkdir : %d",count);
+    if(count == 2) mkdir(args[1],"700");
+    else mkdir(args[1],args[2]);
 }
 
 void cat(int count, char *args[]){
@@ -80,39 +100,43 @@ void cat(int count, char *args[]){
 }
 
 int grep(char *pat, char *fn){
-    char array[5000];
-    int flag = 1;
+    printf("%s\t%s\n",pat,fn);
+    char line[500];
+    int i=1;
     FILE *fp = fopen(fn,"r");
-    if(fp == NULL){printf("can't open file");return -1;}
-    int ln = 0,count=0;
-    char c = fgetc(fp);
-    while(c != EOF){
-        while(c != '\n' && c != EOF) {
-            array[count++] = c;
-            c = fgetc(fp);
+    while(fscanf(fp,"%s\n",line) != EOF){
+        if(strstr(line,pat)){
+            printf("%d:%s\n",i,line);
         }
-        array[count++] = '\0';
-        ln++;
-        for(int j=0 ; j<count ; j++){
-            flag = 1;
-            int k=0;
-            while(pat[k] != '\0') {
-                if(pat[k] != array[j+k]) {
-                    flag = 0;
-                    break;
-                }
-                k++;
-            }
-            if(flag) printf("%d:",ln);
-        }
+        i++;
     }
+    fclose(fp);
+
 
 }
 
-int input(char *str){
-    char* buf; 
-  
-    buf = readline("\n>>> "); 
+void cp_u(char *in, char *out){
+    struct stat tin,tout;
+    stat(in, &tin);
+    stat(out,&tout);
+    if(strcmp(ctime(&tin.st_mtime),ctime(&tout.st_mtime)) !=0 ) cp(in,out);
+    else printf("File isn't modified");
+}
+
+int input(char *str)
+{
+    char* buf;
+    char host[100],*user,prompt[1024]="\n";
+    gethostname(host,100);
+    user = getenv("USER");
+    strcat(prompt,user);
+    strcat(prompt,"@");
+    strcat(prompt,host);
+    getcwd(host,100);
+    strcat(prompt,":~");
+    strcat(prompt,host);
+    strcat(prompt,"$ ");
+    buf = readline(prompt); 
     if (strlen(buf) != 0) { 
         add_history(buf); 
         strcpy(str, buf); 
@@ -137,6 +161,8 @@ int parse(char* str, char** parsed)
     return i; 
 } 
 
+
+
 int main(){
     int status = 1;
     do{
@@ -144,9 +170,21 @@ int main(){
         if(input(cmds)) continue;
         int count = parse(cmds,args);
 
-        if(strcmp(args[0],"cat") == 0) cat(count, args);
-        if(strcmp(args[0],"exit") == 0) status = 0;
+        if(strcmp(args[0],"ls") == 0) ls(count, args);
         if(strcmp(args[0],"cd") == 0) cd(args[1]);
+        if(strcmp(args[0],"cat") == 0) cat(count, args);
+        if(strcmp(args[0],"mkdir") == 0) mkdir_commnd(count, args);
+        if(strcmp(args[0],"cp") == 0){
+            if(strcmp(args[1],"-u")==0) cp_u(args[2],args[3]);
+            else
+            {
+                cp(args[1],args[2]);
+            }
+            
+        }
+        if(strcmp(args[0],"grep") == 0) {if(strcmp(args[1],"-n")==0)grep(args[2],args[3]);}
+
+        if(strcmp(args[0],"exit") == 0) status = 0;
     
     }
     while(status);
