@@ -79,7 +79,6 @@ void game(int count, char *args[]){
 
 	for(int i=0 ; i<N ; i++){
 		if((pid = fork()) == 0){
-            printf("dfjsdkfjlsd\n");
 			close(pipes[i][0][1]); //close the write end of request pipe in child process
 			close(pipes[i][1][0]); //close read end of response pipe
 			rid = i;//id to communicate with parent and access pipes
