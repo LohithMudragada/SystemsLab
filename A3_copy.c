@@ -59,7 +59,6 @@ int main(int count,char *args[]){
         if(s[i] != 0)printf("S\t%d\t%d\n",i,s[i]);
     }
 
-
     int pipes[N][2][2];
 	for(int i=0 ; i<N ; i++){
 		/*Pipe To Request child a number*/
@@ -78,9 +77,7 @@ int main(int count,char *args[]){
         {
             close(pipes[i][0][0]); //close the read end of request pipe
             close(pipes[i][1][1]); //close the write end of response pipe   
-        }
-        
-
+        }    
 	}
 	int run=1;
 
@@ -109,7 +106,7 @@ int main(int count,char *args[]){
                     write(pipes[i][0][1],&i,sizeof(int));
                     read(pipes[i][1][0],id,sizeof(int));
                     int temp = p_s[i]+*id;
-                    if(temp > S){
+                    if(temp >= S){
                         printf("Winner is : %d\n",i);
                         run = 0;
                         break;
