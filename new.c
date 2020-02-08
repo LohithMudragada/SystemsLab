@@ -117,7 +117,7 @@ void cp_u(char *in, char *out){
     struct stat tin,tout;
     stat(in, &tin);
     stat(out,&tout);
-    if(tin.st_mtime > tout.st_mtime ) cp(in,out);
+    if(strcmp(ctime(&tin.st_mtime),ctime(&tout.st_mtime)) > 0 ) cp(in,out);
     else printf("File isn't modified");
 }
 

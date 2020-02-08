@@ -13,9 +13,10 @@ int main(int count,char *args[]){
 	}
 	int S = atoi(args[1]);
 	int N = atoi(args[2]);
+	int *p_status = (int *)malloc(N*sizeof(int));
 	char * fn = args[3];
 	printf("%d\t%d\t%s\n",S,N,fn);
-	int Game[50],pipes[N][2][2];
+	int pipes[N][2][2];
 	for(int i=0 ; i<N ; i++){
 		/*Pipe To Request child a number*/
 		pipe(pipes[i][0]);
